@@ -127,9 +127,8 @@ const Location = () => {
 
       <div
         ref={marker}
-        className={`h-12 w-12 bg-cover cursor-pointer ${
-          !issLocation ? "hidden" : ""
-        }`}
+        className={`h-12 w-12 bg-cover cursor-pointer ${!issLocation ? "hidden" : ""
+          }`}
         style={{ backgroundImage: "url('/assets/satellite.png')" }}
         onClick={() => {
           history.push(`/details/${issLocation?.timestamp}`);

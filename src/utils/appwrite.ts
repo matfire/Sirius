@@ -10,8 +10,8 @@ app
   .setProject("618d4b5b761f4"); // Your project ID
 
 
-const createDocument = async (collectionID:string, data:object, read:Array<string>, write:Array<string>) => {
-  await app.database.createDocument(collectionID, data, read, write);
+const createDocument = async (collectionID:string, data:any, read:Array<string>, write:Array<string>) => {
+  await app.database.createDocument(collectionID, "unique()", data, read, write);
 };
 
 const createPositionRecord = async (data: IUserPosition , offlineFallback = false) => {
@@ -19,7 +19,7 @@ const createPositionRecord = async (data: IUserPosition , offlineFallback = fals
     await createDocument(
       USER_POSITION_COLLECTION,
       data,
-      ["*"],
+      ["role:all"],
       ["role:member"]
     );
   } catch (error) {

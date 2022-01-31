@@ -11,6 +11,7 @@ import { useHistory } from "react-router";
 import LoadingScreen from "../components/LoadingScreen";
 import userContext from "../context/userContext";
 import { useHasInternet } from "../context/hasInternetContext";
+import { Query } from "appwrite";
 
 const Home = () => {
   mapbox.accessToken = MAPBOX_TOKEN;
@@ -45,8 +46,10 @@ const Home = () => {
           [],
           1,
           0,
-          "timestamp",
-          "DESC"
+          undefined,
+          undefined,
+          ["timestamp"],
+          ["DESC"]
         );
         IssPosition.current
           .setLngLat({
@@ -88,20 +91,22 @@ const Home = () => {
   useEffect(() => {
     const getPositions = async () => {
       try {
-        const positions = await app.database.listDocuments<UserPosition>(
-          USER_POSITION_COLLECTION,
-          [`user=${userC.user?.$id}`]
-        );
-        positions.documents.forEach((e) => {
-          if (map.current !== undefined) {
-            new mapbox.Marker()
-              .setLngLat({ lat: e.latitude, lon: e.longitude })
-              .addTo(map.current)
-              .getElement().onclick = () => {
-              history.push(`/location/${e.$id}`);
-            };
-          }
-        });
+        if (userC.user !== undefined) {
+          const positions = await app.database.listDocuments<UserPosition>(
+            USER_POSITION_COLLECTION,
+            [Query.equal("user", userC.user.$id)]
+          );
+          positions.documents.forEach((e) => {
+            if (map.current !== undefined) {
+              new mapbox.Marker()
+                .setLngLat({ lat: e.latitude, lon: e.longitude })
+                .addTo(map.current)
+                .getElement().onclick = () => {
+                  history.push(`/location/${e.$id}`);
+                };
+            }
+          });
+        }
       } catch (error) {
         console.log("could not get user position");
       }

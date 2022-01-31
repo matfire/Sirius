@@ -1,6 +1,7 @@
 import mapbox from "mapbox-gl";
 import { useEffect, useState, useRef, useContext } from "react";
 import toast from "react-hot-toast";
+import { Query } from "appwrite";
 import { useParams } from "react-router-dom";
 import LoadingScreen from "../components/LoadingScreen";
 import userContext from "../context/userContext";
@@ -35,30 +36,34 @@ const Details = () => {
 
   useEffect(() => {
     const getPositions = async () => {
-      try {
-        const value = await app.database.listDocuments<ISSPosition>(
-          POSITION_COLLECTION,
-          [`timestamp=${timestamp}`],
-          1
-        );
-        const res = value.documents[0];
-        setData({ ...res, onboard: JSON.parse(res.onboard) });
-        if (marker.current !== null) {
-          IssPosition.current = new mapbox.Marker(marker.current);
+      if (timestamp) {
+        try {
+          console.log(Query.equal("timestamp", parseFloat(timestamp)))
+          const value = await app.database.listDocuments<ISSPosition>(
+            POSITION_COLLECTION,
+            [
+              Query.equal("timestamp", parseInt(timestamp))
+            ]
+          );
+          const res = value.documents[0];
+          setData({ ...res, onboard: JSON.parse(res.onboard) });
+          if (marker.current !== null) {
+            IssPosition.current = new mapbox.Marker(marker.current);
+          }
+          if (map.current?.setCenter && IssPosition.current !== null) {
+            map.current.setCenter({ lat: res.latitude, lon: res.longitude });
+            IssPosition.current
+              .setLngLat({ lat: res.latitude, lon: res.longitude })
+              .addTo(map.current);
+          }
+          setLoading(false);
+        } catch (error) {
+          console.error(error);
+          toast.error(
+            "Could not get data, something must have gone terribly wrong"
+          );
+          setLoading(false);
         }
-        if (map.current?.setCenter && IssPosition.current !== null) {
-          map.current.setCenter({ lat: res.latitude, lon: res.longitude });
-          IssPosition.current
-            .setLngLat({ lat: res.latitude, lon: res.longitude })
-            .addTo(map.current);
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error(error);
-        toast.error(
-          "Could not get data, something must have gone terribly wrong"
-        );
-        setLoading(false);
       }
     };
     getPositions();
