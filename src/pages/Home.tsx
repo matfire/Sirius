@@ -1,6 +1,6 @@
-import mapbox from "mapbox-gl";
-import { useContext, useEffect, useRef, useState } from "react";
+import { ReactElement, useContext, useEffect, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
+import Map, { Marker } from 'react-map-gl';
 import { app, ISSPosition, UserPosition } from "../utils/appwrite";
 import {
   MAPBOX_TOKEN,
@@ -13,53 +13,31 @@ import userContext from "../context/userContext";
 import { useHasInternet } from "../context/hasInternetContext";
 import { Query } from "appwrite";
 
+
 const Home = () => {
-  mapbox.accessToken = MAPBOX_TOKEN;
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapbox.Map>();
-  const marker = useRef<HTMLDivElement>(null);
   const history = useHistory();
   const userC = useContext(userContext);
   const hasInternet = useHasInternet();
-  const IssPosition = useRef<mapbox.Marker>(new mapbox.Marker());
   const [currentIss, setCurrentIss] = useState<ISSPosition>();
+  const [savedPositions, setSavedPositions] = useState<ReactElement[]>([])
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const initMapAndPositions = async () => {
-      if (map.current) return;
       if (!hasInternet) return;
-      if (
-        mapContainer.current !== null &&
-        IssPosition.current !== null &&
-        marker.current !== null
-      ) {
-        map.current = new mapbox.Map({
-          container: mapContainer.current,
-          center: { lat: 46.56667, lon: 3.33333 },
-          zoom: 2,
-          style: "mapbox://styles/mapbox/dark-v10",
-        });
-        IssPosition.current = new mapbox.Marker(marker.current);
-        const lastPosition = await app.database.listDocuments<ISSPosition>(
-          POSITION_COLLECTION,
-          [],
-          1,
-          0,
-          undefined,
-          undefined,
-          ["timestamp"],
-          ["DESC"]
-        );
-        IssPosition.current
-          .setLngLat({
-            lat: lastPosition.documents[0]["latitude"],
-            lon: lastPosition.documents[0]["longitude"],
-          })
-          .addTo(map.current);
-        setCurrentIss(lastPosition.documents[0]);
-        setLoading(false);
-      }
+      const lastPosition = await app.database.listDocuments<ISSPosition>(
+        POSITION_COLLECTION,
+        [],
+        1,
+        0,
+        undefined,
+        undefined,
+        ["timestamp"],
+        ["DESC"]
+      );
+      setCurrentIss(lastPosition.documents[0]);
+      setLoading(false);
+
     };
     initMapAndPositions();
   }, [hasInternet]);
@@ -80,10 +58,6 @@ const Home = () => {
     payload: ISSPosition;
   }) => {
     if (payload.event === "database.documents.create") {
-      IssPosition.current.setLngLat({
-        lon: payload.payload.longitude,
-        lat: payload.payload.latitude,
-      });
       setCurrentIss(payload.payload);
     }
   };
@@ -96,41 +70,56 @@ const Home = () => {
             USER_POSITION_COLLECTION,
             [Query.equal("user", userC.user.$id)]
           );
-          positions.documents.forEach((e) => {
-            if (map.current !== undefined) {
-              new mapbox.Marker()
-                .setLngLat({ lat: e.latitude, lon: e.longitude })
-                .addTo(map.current)
-                .getElement().onclick = () => {
-                  history.push(`/location/${e.$id}`);
-                };
-            }
+          const tmpPositions = positions.documents.map((e) => {
+            return (
+              <Marker
+                onClick={() => history.push(`/location/${e.$id}`)}
+                latitude={e.latitude}
+                longitude={e.longitude}
+              />
+            );
           });
+          setSavedPositions(tmpPositions);
         }
       } catch (error) {
         console.log("could not get user position");
       }
     };
     if (userC.user !== undefined) getPositions();
-  }, [userC, map, history]);
+  }, [userC, history]);
+
+  if (loading) {
+    return (
+      <div className="h-full w-full">
+        <LoadingScreen text="Fetching latest data, please wait..." />
+      </div>
+    )
+  }
 
   return (
     <div className="h-full w-full">
-      {hasInternet && loading && (
-        <LoadingScreen text="Fetching latest data, please wait..." />
-      )}
-      <div />
-      {hasInternet || (!hasInternet && map.current) ? (
+      {hasInternet ? (
         <>
-          <div
-            ref={marker}
-            className="h-12 w-12 bg-cover cursor-pointer"
-            style={{ backgroundImage: "url('/assets/satellite.png')" }}
-            onClick={() => {
-              history.push(`/details/${currentIss?.timestamp}`);
-            }}
-          />
-          <div className="h-full w-full" ref={mapContainer} />
+
+
+          <Map style={{ height: "100%", width: "100%" }}
+            mapboxAccessToken={MAPBOX_TOKEN}
+            mapStyle="mapbox://styles/mapbox/dark-v10"
+            initialViewState={{
+              zoom: 2,
+            }}>
+            <Marker
+              onClick={() => {
+                history.push(`/details/${currentIss?.timestamp}`);
+              }}
+              latitude={currentIss?.latitude}
+              longitude={currentIss?.longitude}
+            >
+              <img src="/assets/satellite.png" alt="satellite" className="h-12 w-12 bg-cover cursor-pointer"
+              />
+            </Marker>
+            {savedPositions}
+          </Map>
         </>
       ) : (
         <div className="hero flex justify-center items-center h-full w-full">
