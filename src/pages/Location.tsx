@@ -1,16 +1,16 @@
-import mapbox from "mapbox-gl";
 import { useParams } from "react-router-dom";
-import userContext from "../context/userContext";
-import { useContext, useState, useEffect, useRef } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useHistory, useLocation } from "react-router";
 import queryString from "query-string";
+import toast from "react-hot-toast";
+import { Map, Marker } from "react-map-gl";
 import {
   app,
   createPositionRecord,
   ISSPosition,
   UserPosition,
 } from "../utils/appwrite";
-import toast from "react-hot-toast";
+import userContext from "../context/userContext";
 import LoadingScreen from "../components/LoadingScreen";
 import {
   MAPBOX_TOKEN,
@@ -22,17 +22,17 @@ const Location = () => {
   const { idlocation } = useParams<{ idlocation: string }>();
   const history = useHistory();
   const location = useLocation();
-  const map = useRef<mapbox.Map>();
   const userC = useContext(userContext);
   const [position, setPosition] = useState<UserPosition | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const marker = useRef<HTMLDivElement>(null);
-  const IssPosition = useRef<mapbox.Marker>(new mapbox.Marker());
   const [issLocation, setIssLocation] = useState<ISSPosition | undefined>(
     undefined
   );
-  const mapContainer = useRef<HTMLDivElement>(null);
-  mapbox.accessToken = MAPBOX_TOKEN;
+  const [viewState, setViewState] = useState({
+    longitude: -100,
+    latitude: 40,
+    zoom: 4
+  });
 
   useEffect(() => {
     const getPosition = async () => {
@@ -42,6 +42,7 @@ const Location = () => {
           idlocation
         );
         setPosition(res);
+        setViewState({ ...viewState, latitude: res.latitude, longitude: res.longitude })
         console.log(res);
         console.log(userC.user);
         setLoading(false);
@@ -69,18 +70,9 @@ const Location = () => {
           }
         }
         if (
-          map.current !== undefined &&
-          marker.current !== null &&
           issLocation !== undefined
         ) {
           console.log("positioning stuff");
-          IssPosition.current = new mapbox.Marker(marker.current);
-          IssPosition.current
-            .setLngLat({
-              lat: issLocation.latitude,
-              lon: issLocation.longitude,
-            })
-            .addTo(map.current);
         }
       } catch (error) {
         toast.error(
@@ -90,52 +82,43 @@ const Location = () => {
       }
     };
     checkForISS();
-  }, [location, map, issLocation]);
+  }, [location, issLocation]);
 
-  useEffect(() => {
-    const getPositions = () => {
-      if (map.current !== undefined && position) {
-        new mapbox.Marker()
-          .setLngLat({ lat: position.latitude, lon: position.longitude })
-          .addTo(map.current);
-        map.current?.setCenter({
-          lon: position.longitude,
-          lat: position.latitude,
-        });
-      }
-    };
-    if (userC.user) getPositions();
-  }, [userC, map, position]);
-
-  useEffect(() => {
-    if (map.current) return;
-    if (mapContainer.current !== null) {
-      map.current = new mapbox.Map({
-        container: mapContainer.current,
-        center: { lat: 46.56667, lon: 3.33333 },
-        zoom: 4,
-        style: "mapbox://styles/mapbox/dark-v10",
-      });
-    }
-  });
+  if (loading) {
+    return (
+      <div className="w-full h-full">
+        <LoadingScreen text="Fetching data for selected time, please wait..." />
+      </div>
+    )
+  }
 
   return (
     <div className="w-full h-full flex flex-col md:flex-row">
-      {loading && (
-        <LoadingScreen text="Fetching data for selected time, please wait..." />
-      )}
-
-      <div
-        ref={marker}
-        className={`h-12 w-12 bg-cover cursor-pointer ${!issLocation ? "hidden" : ""
-          }`}
-        style={{ backgroundImage: "url('/assets/satellite.png')" }}
-        onClick={() => {
-          history.push(`/details/${issLocation?.timestamp}`);
-        }}
-      ></div>
       <div className="w-full md:w-2/3 h-96 md:h-full">
-        <div className="h-full w-full" ref={mapContainer} />
+        <Map
+          style={{ height: "100%", width: "100%" }}
+          mapStyle="mapbox://styles/mapbox/dark-v10"
+          mapboxAccessToken={MAPBOX_TOKEN}
+          onMove={evt => setViewState(evt.viewState)}
+          {...viewState}>
+          <Marker
+            longitude={position?.longitude}
+            latitude={position?.latitude}
+          >
+
+          </Marker>
+          {issLocation &&
+            <Marker
+              latitude={issLocation.latitude}
+              longitude={issLocation.longitude}
+              onClick={() => {
+                history.push(`/details/${issLocation?.timestamp}`);
+              }}
+            >
+              <img className={`h-12 w-12 bg-cover cursor-pointer ${!issLocation ? "hidden" : ""
+                }`} alt="satellite" src="/assets/satellite.png" />
+            </Marker>}
+        </Map>
       </div>
       <div className="flex flex-col justify-evenly w-full md:w-1/3">
         <div className="w-full">
