@@ -1,5 +1,4 @@
-import mapbox from "mapbox-gl";
-import { useEffect, useState, useRef, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import toast from "react-hot-toast";
 import { Query } from "appwrite";
 import { useParams } from "react-router-dom";
@@ -8,6 +7,7 @@ import userContext from "../context/userContext";
 import { useHasInternet } from "../context/hasInternetContext";
 import { app, createPositionRecord, ISSPosition } from "../utils/appwrite";
 import { MAPBOX_TOKEN, POSITION_COLLECTION } from "../utils/constants";
+import Map, { Marker } from "react-map-gl";
 
 const Details = () => {
   const { timestamp } = useParams<{ timestamp: string }>();
@@ -15,30 +15,16 @@ const Details = () => {
   const hasInternet = useHasInternet();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>();
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapbox.Map>();
-  const marker = useRef<HTMLDivElement>(null);
-  const IssPosition = useRef<mapbox.Marker>(new mapbox.Marker());
-  mapbox.accessToken = MAPBOX_TOKEN;
-
-  useEffect(() => {
-    if (map.current) return;
-    if (!hasInternet) return;
-    if (mapContainer.current !== null) {
-      map.current = new mapbox.Map({
-        container: mapContainer.current,
-        center: { lat: 46.56667, lon: 3.33333 },
-        zoom: 4,
-        style: "mapbox://styles/mapbox/dark-v10",
-      });
-    }
-  }, [hasInternet]);
+  const [viewState, setViewState] = useState({
+    longitude: -100,
+    latitude: 40,
+    zoom: 3.5
+  });
 
   useEffect(() => {
     const getPositions = async () => {
       if (timestamp) {
         try {
-          console.log(Query.equal("timestamp", parseFloat(timestamp)))
           const value = await app.database.listDocuments<ISSPosition>(
             POSITION_COLLECTION,
             [
@@ -47,15 +33,6 @@ const Details = () => {
           );
           const res = value.documents[0];
           setData({ ...res, onboard: JSON.parse(res.onboard) });
-          if (marker.current !== null) {
-            IssPosition.current = new mapbox.Marker(marker.current);
-          }
-          if (map.current?.setCenter && IssPosition.current !== null) {
-            map.current.setCenter({ lat: res.latitude, lon: res.longitude });
-            IssPosition.current
-              .setLngLat({ lat: res.latitude, lon: res.longitude })
-              .addTo(map.current);
-          }
           setLoading(false);
         } catch (error) {
           console.error(error);
@@ -69,20 +46,41 @@ const Details = () => {
     getPositions();
   }, [timestamp, hasInternet]);
 
+  useEffect(() => {
+    if (data && viewState.latitude === 40 && viewState.longitude === -100) {
+      setViewState({
+        ...viewState,
+        latitude: data.latitude,
+        longitude: data.longitude
+      })
+    }
+  }, [data, viewState])
+
+  if (loading) {
+    return (
+      <div className="w-full h-full">
+        <LoadingScreen text="Fetching data for selected time, please wait..." />
+      </div>
+    )
+  }
   return (
     <div className="w-full h-full flex flex-col md:flex-row">
-      {hasInternet && loading && (
-        <LoadingScreen text="Fetching data for selected time, please wait..." />
-      )}
-      {hasInternet || (!hasInternet && map.current) ? (
+      {hasInternet ? (
         <>
           <div className="w-full md:w-2/3 h-96 md:h-full">
-            <div
-              ref={marker}
-              className="h-12 w-12 bg-cover"
-              style={{ backgroundImage: "url('/assets/satellite.png')" }}
-            ></div>
-            <div className="h-full w-full" ref={mapContainer} />
+            <Map
+              mapboxAccessToken={MAPBOX_TOKEN}
+              style={{ width: "100%", height: "100%" }}
+              mapStyle="mapbox://styles/mapbox/dark-v10"
+              onMove={evt => setViewState(evt.viewState)}
+              {...viewState}
+            >
+              <Marker
+                latitude={data.latitude} longitude={data.longitude}
+              >
+                <img src="/assets/satellite.png" className="h-12 w-12" alt="satellite" />
+              </Marker>
+            </Map>
           </div>
           <div className="flex flex-col justify-evenly">
             <div className="text-center">
