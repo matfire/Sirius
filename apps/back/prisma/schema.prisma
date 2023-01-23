@@ -38,7 +38,7 @@ model Device {
 model User {
   id        Int        @id @default(autoincrement())
   email     String     @unique
-  username  String?
+  username  String    @unique
   password  String
   locations Location[]
   devices   Device[]

@@ -2,7 +2,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "db:generate": "turbo run db:generate"
+    "db:generate": "turbo run db:generate",
+    "db:push": "turbo run db:push"
   },
   "packageManager": "pnpm@7.25.0"
 }
