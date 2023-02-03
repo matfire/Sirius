@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 
 interface AuthContext {
@@ -9,9 +9,9 @@ interface AuthContext {
 }
 
 
-export const authContext = createContext<AuthContext>({ email: "", token: "", username: "", updateUser: () => { } })
+export const authContext = createContext<AuthContext | null>(null)
 
-export default function AuthProvider({ children }) {
+export default function AuthProvider({ children }: { children: React.ReactElement }) {
     const [token, setToken] = useState("")
     const [email, setEmail] = useState("")
     const [username, setUsername] = useState("")

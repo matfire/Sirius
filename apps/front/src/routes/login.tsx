@@ -9,7 +9,7 @@ export default function Login() {
     const [, loginUser] = useMutation(LOGIN)
     const { updateUser } = useContext(authContext)
 
-    const onSubmit = (v) => {
+    const onSubmit = (v: any) => {
         console.log(v)
         loginUser({ email: v.email, password: v.password }).then((data) => {
             console.log(data.data)
