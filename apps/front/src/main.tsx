@@ -6,6 +6,7 @@ import './index.css'
 import Home from './routes/home'
 import Login from './routes/login'
 import NotFound from './routes/notFound'
+import Register from './routes/register'
 
 const router = createBrowserRouter([{
   path: "/",
@@ -14,11 +15,15 @@ const router = createBrowserRouter([{
   children: [
     {
       path: "/",
-      element: <Home />
+      element: <Home />,
     },
     {
       path: "login",
       element: <Login />
+    },
+    {
+      path: "register",
+      element: <Register />
     }
   ]
 }])
