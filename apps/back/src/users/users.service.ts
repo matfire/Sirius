@@ -22,6 +22,10 @@ export class UsersService {
   }
   async login(data: LoginDTO): Promise<boolean> {
     const user = await this.findOne(data.email);
+if (!user) {
+  throw UnauthorizedException;
+}
+
     const match = await bcrypt.compare(data.password, user.password);
     if (!match) {
       throw UnauthorizedException;
