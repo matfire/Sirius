@@ -1,35 +1,43 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from "react-router-dom"
-import App from './App'
-import './index.css'
-import Home from './routes/home'
-import Login from './routes/login'
-import NotFound from './routes/notFound'
-import Register from './routes/register'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import App from "./App";
+import AuthProvider from "./contexts/auth.context";
+import ThemeProvider from "./contexts/theme.context";
+import "./index.css";
+import Home from "./routes/home";
+import Login from "./routes/login";
+import NotFound from "./routes/notFound";
+import Register from "./routes/register";
 
-const router = createBrowserRouter([{
-  path: "/",
-  element: <App />,
-  errorElement: <NotFound />,
-  children: [
-    {
-      path: "/",
-      element: <Home />,
-    },
-    {
-      path: "login",
-      element: <Login />
-    },
-    {
-      path: "register",
-      element: <Register />
-    }
-  ]
-}])
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    errorElement: <NotFound />,
+    children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "login",
+        element: <Login />,
+      },
+      {
+        path: "register",
+        element: <Register />,
+      },
+    ],
+  },
+]);
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
-)
+    <AuthProvider>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </AuthProvider>
+  </React.StrictMode>
+);
