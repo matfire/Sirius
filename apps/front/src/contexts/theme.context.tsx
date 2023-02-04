@@ -13,13 +13,13 @@ export const themeContext = createContext<ThemeContext>({
 export default function ThemeProvider({
   children,
 }: {
-  children: React.ReactElement[];
+  children: React.ReactElement[] | React.ReactElement;
 }) {
   const [theme, setTheme] = useState("dark");
 
   useEffect(() => {
     if (localStorage.getItem("sirius_theme"))
-      setTheme(localStorage.getItem("sirius_theme"));
+      setTheme(localStorage.getItem("sirius_theme")!);
   }, []);
 
   const toggleTheme = () => {
