@@ -20,7 +20,8 @@ import { UsersModule } from './users/users.module';
       driver: ApolloDriver,
       autoSchemaFile: true,
       subscriptions: {
-        'graphql-ws':true
+        'graphql-ws':true,
+        'subscriptions-transport-ws':true
       }
     }),
     LocationModule,
