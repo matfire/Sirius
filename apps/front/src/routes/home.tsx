@@ -1,11 +1,20 @@
 import { useContext, useMemo } from "react";
 import { Map, Marker } from "react-map-gl";
-import { useQuery } from "urql"
+import { useQuery, useSubscription } from "urql"
 import { Icon } from '@iconify/react';
 import { Record } from "../models/Record.model";
 import { LAST_RECORD } from "../utils/queries";
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { themeContext } from "../contexts/theme.context";
+import { GET_RECORDS } from "../utils/subscriptions";
+
+function handleNewRecords(old: Record[] | undefined, response: { recordCreated: Record; }) {
+    console.log(old, response)
+    if (old) {
+        return [response.recordCreated, ...old]
+    }
+    return [response.recordCreated]
+}
 
 export default function Home() {
 
@@ -13,9 +22,11 @@ export default function Home() {
     const [record] = useQuery({
         query: LAST_RECORD,
     });
+    const [res] = useSubscription({ query: GET_RECORDS }, handleNewRecords);
     const lastPosition: Record = useMemo(() => {
+        if (res?.data?.length > 0) return res?.data?.at(0)
         if (record.data) return record.data.lastRecord
-    }, [record])
+    }, [record, res])
 
     if (record.fetching) return (<p>loading...</p>)
 

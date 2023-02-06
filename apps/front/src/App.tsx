@@ -1,16 +1,19 @@
 import { Provider } from "urql";
 import { Outlet } from "react-router-dom";
+import Helmet from "react-helmet"
 import client from "./utils/graphql";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { useContext } from "react";
-import { authContext } from "./contexts/auth.context";
-
+import { themeContext } from "./contexts/theme.context";
 function App() {
-  //const { theme } = useContext(authContext);
-  //TODO react helmet
+  const { theme } = useContext(themeContext);
+
   return (
     <Provider value={client}>
+      <Helmet>
+        <html className={theme === "dark" ? "dark" : ""} />
+      </Helmet>
       <header>
         <Header />
       </header>
