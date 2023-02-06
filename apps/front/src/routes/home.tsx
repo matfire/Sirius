@@ -24,7 +24,7 @@ export default function Home() {
     });
     const [res] = useSubscription({ query: GET_RECORDS }, handleNewRecords);
     const lastPosition: Record = useMemo(() => {
-        if (res?.data?.length > 0) return res?.data?.at(0)
+        if (res?.data?.length && res?.data.length > 0) return res?.data?.at(0)
         if (record.data) return record.data.lastRecord
     }, [record, res])
 
