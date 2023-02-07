@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useMutation, useQuery } from "urql"
 import { Location } from "../models/Location.model"
@@ -11,13 +11,21 @@ export default function Locations() {
     const [result] = useQuery({
         query: LOCATIONS
     })
-    const [createResult, createLocation] = useMutation(CREATE_LOCATION)
+    const [, createLocation] = useMutation(CREATE_LOCATION)
     const [searchResults, setSearchResults] = useState<ReverseLocation[]>([])
+    const [searchLoading, setSearchLoading] = useState(false);
     const locations: Location[] = useMemo(() => {
         return result?.data?.locations || []
     }, [result.data])
 
-    const { register, handleSubmit } = useForm()
+    const { register, handleSubmit, watch } = useForm()
+    const searchValue = watch("location");
+
+    useEffect(() => {
+        if (searchValue === "" && searchResults.length > 0) {
+            setSearchResults([])
+        }
+    }, [searchValue])
 
     if (result.fetching) {
         return <p>loading...</p>
@@ -25,9 +33,10 @@ export default function Locations() {
 
 
     const onSubmit = async (v: any) => {
+        setSearchLoading(true)
         let res = await (await fetch(`https://geocode.maps.co/search?q=${v.location}`)).json()
         setSearchResults(res);
-        console.log(res)
+        setSearchLoading(false)
     }
 
     const saveLocation = async (e: ReverseLocation) => {
@@ -36,21 +45,10 @@ export default function Locations() {
 
 
     return (
-        <div className="w-full h-full">
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <label className="label">Location</label>
-                <input type="text" placeholder="search for a location" className="input" {...register("location")} required />
-                <button className="btn" type="submit">Search</button>
-            </form>
+        <div className="w-full h-full flex flex-col">
 
-            <ul>
-                {searchResults.map((e) => (
-                    <li key={e.place_id}><span>{e.display_name}</span><button className="btn" onClick={() => saveLocation(e)}>Save</button></li>
-                ))}
-            </ul>
-            <div className="divider"></div>
 
-            <table className="table">
+            <table className="table w-full">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -70,6 +68,23 @@ export default function Locations() {
                     ))}
                 </tbody>
             </table>
+            <div className="divider"></div>
+            <div className="card w-96 bg-base-100 shadow-xl self-center">
+                <div className="card-body">
+                    <h2 className="card-title">Add Location</h2>
+                    <form onSubmit={handleSubmit(onSubmit)} className="mb-5 ">
+                        <label className="label">Location</label>
+                        <input disabled={searchLoading} type="search" placeholder="search for a location" className="input" {...register("location")} required />
+                        <button disabled={searchLoading} className={`btn ${searchLoading ? "loading" : ""}`} type="submit">Search</button>
+                    </form>
+                </div>
+            </div>
+
+            <ul>
+                {searchResults.map((e) => (
+                    <li className="flex justify-between" key={e.place_id}><span>{e.display_name}</span><button className="btn" onClick={() => saveLocation(e)}>Save</button></li>
+                ))}
+            </ul>
         </div>
     )
 }
