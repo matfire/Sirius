@@ -6,16 +6,17 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
 model Location {
-  id        Int   @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   longitude Float
   latitude  Float
-  user      User  @relation(fields: [userId], references: [id])
+  name      String
+  user      User   @relation(fields: [userId], references: [id])
   userId    Int
 
   @@index([userId])
@@ -43,7 +44,7 @@ model Device {
 model User {
   id        Int        @id @default(autoincrement())
   email     String     @unique
-  username  String    @unique
+  username  String     @unique
   password  String
   locations Location[]
   devices   Device[]

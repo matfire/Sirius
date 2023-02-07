@@ -8,4 +8,6 @@ export class Location {
   longitude: number;
   @Field(() => Int)
   id: number;
+  @Field(() => String)
+  name: string;
 }

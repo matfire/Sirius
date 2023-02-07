@@ -7,4 +7,6 @@ export class LocationCreateDTO {
   latitude: number;
   @Field(() => Float)
   longitude: number;
+  @Field(() => String)
+  name: string;
 }
