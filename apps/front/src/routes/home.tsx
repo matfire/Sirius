@@ -1,5 +1,5 @@
-import { useContext, useMemo } from "react";
-import { Map, Marker } from "react-map-gl";
+import { useContext, useMemo, useRef } from "react";
+import { Map, MapRef, Marker } from "react-map-gl";
 import { useQuery, useSubscription } from "urql"
 import { Icon } from '@iconify/react';
 import { Record } from "../models/Record.model";
@@ -19,6 +19,7 @@ function handleNewRecords(old: Record[] | undefined, response: { recordCreated: 
 export default function Home() {
 
     const { theme } = useContext(themeContext)
+    const mapRef = useRef<MapRef | null>(null)
     const [record] = useQuery({
         query: LAST_RECORD,
     });
@@ -31,8 +32,12 @@ export default function Home() {
     if (record.fetching) return (<p>loading...</p>)
 
     return (
-        <div className="w-full h-full">
+        <div className="w-full h-full relative">
+            <button className="absolute top-0 right-0 z-10" onClick={() => {
+                mapRef?.current?.flyTo({ center: [lastPosition.longitude, lastPosition.latitude] })
+            }}>Center On Station</button>
             <Map
+                ref={mapRef}
                 mapboxAccessToken={import.meta.env.VITE_MAP_TOKEN}
                 mapStyle={theme === "light" ? "mapbox://styles/mapbox/streets-v9" : "mapbox://styles/mapbox/dark-v11"}
                 style={{ width: "100%", height: "100%" }}
