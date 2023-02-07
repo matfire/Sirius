@@ -9,3 +9,14 @@ query {
   }
 }
 `
+
+export const LOCATIONS = gql`
+query {
+  locations {
+    latitude
+    longitude
+    id
+    name
+  }
+}
+`

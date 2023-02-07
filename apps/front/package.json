@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/react-helmet": "^6.1.6",
+    "daisyui": "^2.50.0",
     "graphql": "^16.6.0",
     "graphql-ws": "^5.11.2",
     "mapbox-gl": "^2.12.0",

@@ -7,6 +7,17 @@ const wsClient = createWSClient({
 
 const client = createClient({
   url: import.meta.env.VITE_API_URL!,
+  fetchOptions: () => {
+    const token = localStorage.getItem("sirius_token")
+    if (token) {
+      return {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    }
+    return {}
+  },
   exchanges: [
     ...defaultExchanges,
     subscriptionExchange({

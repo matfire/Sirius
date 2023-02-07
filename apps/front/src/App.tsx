@@ -12,7 +12,7 @@ function App() {
   return (
     <Provider value={client}>
       <Helmet>
-        <html className={theme === "dark" ? "dark" : ""} />
+        <html data-theme={theme} />
       </Helmet>
       <header>
         <Header />

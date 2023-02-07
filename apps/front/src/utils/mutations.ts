@@ -14,3 +14,11 @@ export const LOGIN = gql`
         }
     }
 `
+
+export const CREATE_LOCATION = gql`
+    mutation($latitude: Float!, $longitude: Float!, $name: String!) {
+        createLocation(locationInput: {latitude:$latitude, longitude:$longitude, name:$name}) {
+            id
+        }
+    }
+`
