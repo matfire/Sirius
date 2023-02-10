@@ -7,7 +7,7 @@ export class TasksService {
   constructor(private prismaService: PrismaService) {}
   private readonly logger = new Logger(TasksService.name);
 
-  @Cron(CronExpression.EVERY_WEEK)
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async purgeDb() {
     this.logger.debug('purging records older than a week');
     const date = new Date();
