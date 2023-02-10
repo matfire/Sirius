@@ -20,6 +20,6 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v4
         with:
-          path: apps/back
+          context: apps/back
           push: true
           tags: matfire/sirius-back:latest
