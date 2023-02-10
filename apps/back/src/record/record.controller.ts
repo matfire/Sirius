@@ -9,7 +9,6 @@ export class RecordController {
   async createRecord(
     @Body() data: { date: Date; latitude: string; longitude: string },
   ): Promise<Record> {
-    console.log('creating record');
     return this.recordService.createRecord({
       ...data,
       latitude: parseFloat(data.latitude),
