@@ -102,6 +102,7 @@ importers:
 
   apps/front:
     specifiers:
+      '@formkit/auto-animate': 1.0.0-beta.6
       '@iconify/react': ^4.1.0
       '@types/react': ^18.0.27
       '@types/react-dom': ^18.0.10
@@ -124,6 +125,7 @@ importers:
       urql: ^3.0.3
       vite: ^4.1.0
     dependencies:
+      '@formkit/auto-animate': 1.0.0-beta.6
       '@types/react-helmet': 6.1.6
       daisyui: 2.50.0_gbtt6ss3tbiz4yjtvdr6fbrj44
       graphql: 16.6.0
@@ -933,6 +935,10 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /@formkit/auto-animate/1.0.0-beta.6:
+    resolution: {integrity: sha512-PVDhLAlr+B4Xb7e+1wozBUWmXa6BFU8xUPR/W/E+TsQhPS1qkAdAsJ25keEnFrcePSnXHrOsh3tiFbEToOzV9w==}
+    dev: false
 
   /@graphql-tools/merge/8.3.12_graphql@16.6.0:
     resolution: {integrity: sha512-BFL8r4+FrqecPnIW0H8UJCBRQ4Y8Ep60aujw9c/sQuFmQTiqgWgpphswMGfaosP2zUinDE3ojU5wwcS2IJnumA==}

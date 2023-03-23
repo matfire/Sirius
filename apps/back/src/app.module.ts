@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaService } from './prisma/prisma.service';
+
 import { RecordModule } from './record/record.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
+
 import { PubSubProvider } from './app.provider';
 import { LocationModule } from './location/location.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './tasks/tasks.module';
+import { DeviceModule } from './device/device.module';
 
 
 @Module({
@@ -32,6 +33,7 @@ import { TasksModule } from './tasks/tasks.module';
     AuthModule,
     UsersModule,
     TasksModule,
+    DeviceModule,
   ],
   controllers: [AppController],
   providers: [AppService, PubSubProvider],

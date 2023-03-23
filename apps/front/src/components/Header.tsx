@@ -10,9 +10,13 @@ export default function Header() {
         <div className="h-16 flex justify-between items-center px-4">
             <Link to="/">Sirius</Link>
             <nav>
-                <ul>
+                <ul className="flex space-x-3">
                     {!token && <li><Link to="/login">Sign In</Link></li>}
-                    {token && <li><Link to="/locations">Locations</Link></li>}
+                    {token && <>
+                        <li><Link to="/locations">Locations</Link></li>
+                        <li><Link to="/devices">Devices</Link></li>
+                    </>
+                    }
                 </ul>
             </nav>
         </div>

@@ -22,3 +22,11 @@ export const CREATE_LOCATION = gql`
         }
     }
 `
+
+export const DELETE_LOCATION = gql`
+    mutation($id: Float!) {
+        deleteLocation(id: $id) {
+            id
+        }
+    }
+`

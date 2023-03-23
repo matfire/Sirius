@@ -5,6 +5,7 @@ import App from "./App";
 import AuthProvider from "./contexts/auth.context";
 import ThemeProvider from "./contexts/theme.context";
 import "./index.css";
+import Devices from "./routes/devices";
 import Home from "./routes/home";
 import Locations from "./routes/locations";
 import Login from "./routes/login";
@@ -32,6 +33,14 @@ const router = createBrowserRouter([
       {
         path: "locations",
         element: <Locations />,
+        loader: () => {
+          if (!localStorage.getItem("sirius_token")) return redirect("/login")
+          return json({ status: "ok" }, { status: 200 })
+        }
+      },
+      {
+        path: "devices",
+        element: <Devices />,
         loader: () => {
           if (!localStorage.getItem("sirius_token")) return redirect("/login")
           return json({ status: "ok" }, { status: 200 })

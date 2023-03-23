@@ -38,7 +38,6 @@ export default function Home() {
     if (record.fetching) return (<p>loading...</p>)
 
     const changePopup = (idx: number) => {
-        console.log("changing", idx)
         setPopup(idx)
     }
 
@@ -63,7 +62,7 @@ export default function Home() {
                 }
             >
                 {popup !== -1 && <Popup anchor="bottom" latitude={locations[popup].latitude} longitude={locations[popup].longitude} onClose={() => setPopup(-1)}>{locations[popup].name}</Popup>}
-                {locations.map((e, idx) => <Marker key={e.id} onClick={() => { console.log(idx); changePopup(1) }} latitude={e.latitude} longitude={e.longitude} />)}
+                {locations.map((e, idx) => <Marker key={e.id} onClick={() => { console.log(idx); changePopup(idx) }} latitude={e.latitude} longitude={e.longitude} />)}
                 <Marker latitude={lastPosition.latitude} longitude={lastPosition.longitude}>
                     <Icon className="h-16 w-auto" icon="noto:satellite" />
                 </Marker>
